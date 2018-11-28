@@ -85,13 +85,7 @@ export default class MapFacesPage extends React.Component {
       this.onSuccessCropPhoto.bind(this, this.state.contact));
   }
 
-//onSuccessCropPhoto(contact, imageUri) {
-//  contact.photos = [ new ContactField("url", imageUri, false) ];
-//    contact.save(this.onSaveContactPhotoSuccess.bind(this),
-//      this.onSaveContactPhotoFailed.bind(this));
-//  }
-
- contact.save(this./**
+  /**
    * 写真の顔領域の切り取りに成功した場合の処理
    * @param contact 現在の連絡先データのコピー
    * @param imageUri 切り取った顔領域の一時保存
@@ -100,18 +94,27 @@ export default class MapFacesPage extends React.Component {
     var facesObj = JSON.parse(this.props.facesRes),
         faces = facesObj.images[0].faces,
         face = faces[this.state.selectFaceIdx],
-        textList = VisualRecognition.resultFaceToTextList(face); // 認識結果
+        textList = VisualRecognition.resultFaceToTextList(face), // 認識結果
+        now = new Date(),
+        year = now.getFullYear(),
+        mon = now.getMonth() + 1,
+        day = now.getDate(),
+        hour = now.getHours(),
+        min = now.getMinutes(),
+        sec = now.getSeconds(),
+        dateStr = year + "年" + mon + "月" + day + "日"
+            + hour + "時" + min + "分" + sec + "秒";
 
     // 写真のURLを上書き
     contact.photos = [ new ContactField("url", imageUri, false) ];
     // コメントが空なら認識結果を挿入、すでに値があれば追記
     if(!contact.note || contact.note == "") {
-      contact.note = textList.join("\n");
+      contact.note = dateStr + "\n" + textList.join("\n") + "\n" ;
     } else {
-      contact.note += "\n" + textList.join("\n");
+      contact.note += "\n" + dateStr + "\n" + textList.join("\n") + "\n" ;
     }
     // 保存
-onSaveContactPhotoSuccess.bind(this),
+    contact.save(this.onSaveContactPhotoSuccess.bind(this),
       this.onSaveContactPhotoFailed.bind(this));
   }
 
@@ -162,7 +165,7 @@ onSaveContactPhotoSuccess.bind(this),
             VisualRecognition.resultFaceToTextList(face).map((text) => <p>{text}</p>)
           }</li>),
         faceAreas = faces.map((face, idx) => <li id={'faceArea' + (idx + 1) + 'Li'} className="faceAreaLi" onClick={this.openSelectContact.bind(this, idx)}><span className="faceLabelSpan">{CNUMS.charAt(idx)}</span></li>);
-
+    
     return (
       <Page renderToolbar={this.renderToolbar}>
         <p style={{textAlign: 'center'}}>
@@ -187,11 +190,6 @@ onSaveContactPhotoSuccess.bind(this),
           </p>
         */}
         { faces.length > 0 && <ol>{faceInfos}</ol> }
-         { faces.length > 0 &&
-          <p style={{ textAlign: 'left'}}>
-            FaceRexは”見た目の年齢を回答しています。
-          </p>
-        }
         { faces.length > 0 && this.state.selectFaceIdx >= 0 &&
           <p style={{color: 'red', textAlign: 'center'}}>
             認識された顔を選択してください。
@@ -228,9 +226,7 @@ onSaveContactPhotoSuccess.bind(this),
       </Page>
     );
   }
-
 }
-
 export const PHOTO_MAX_W = 1600,
             PHOTO_MAX_H = 1600,
             FACE_T_MGN = 0.4,
@@ -239,6 +235,8 @@ export const PHOTO_MAX_W = 1600,
             FACE_R_MGN = 0.4,
             CNUMS = "❶❷❸❹❺❻❼❽❾❿⓫⓬⓭⓮⓯⓰⓱⓲⓳⓴";
 
+
+
 function updateFaces() {
   var winWidth = $(window).width(),
       imgWidth = $("#imageOrgWidth").val(),
@@ -246,7 +244,7 @@ function updateFaces() {
       facesRes = $("#facesRes").val(),
       facesObj = JSON.parse(facesRes),
       faces = facesObj.images[0].faces;
-
+ 
   if(PHOTO_MAX_W > imgWidth) {
     if(winWidth > imgWidth) {
       ratio = 1;

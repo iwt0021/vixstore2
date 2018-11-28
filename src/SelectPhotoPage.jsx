@@ -107,7 +107,7 @@ export default class SelectPhotoPage extends React.Component {
         </p>
         <ul style={{padding: '10px 5px', border: '1px solid black', borderRadius: '10px'}}>
           <li>
-            撮影した顔写真を連絡先に保存できます。
+            撮影した顔写真と判定結果を連絡先に保存できます。
           </li><li>
             あらかじめ連絡先に氏名等を登録しておいてください。
           </li>

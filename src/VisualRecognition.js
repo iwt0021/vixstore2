@@ -39,7 +39,7 @@ export default class VisualRecognition {
 
   static resultFaceToTextList(face) {
     var textList = [],
-        text = '年齢: ';
+        text = '見た目年齢: ';
     if ('max' in face.age && 'min' in face.age) {
       //年齢の上限と下限が認識された場合
       text += face.age.min + ' - ' + face.age.max + ' ( ' + face.age.score + ')';
