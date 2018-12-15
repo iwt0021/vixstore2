@@ -42,15 +42,15 @@ export default class VisualRecognition {
         text = '見た目年齢: ';
     if ('max' in face.age && 'min' in face.age) {
       //年齢の上限と下限が認識された場合
-      text += face.age.min + ' - ' + face.age.max + ' ( ' + face.age.score + ')';
+      text += face.age.min + ' - ' + face.age.max + '歳 ' + ' ( ' + face.age.score + ')';
       textList.push(text);
     } else if ('max' in face.age){
       //年齢の上限のみ認識された場合
-      text += face.age.max + ' ( ' + face.age.score + ')';
+      text += face.age.max + '歳 ' + ' ( ' + face.age.score + ')';
       textList.push(text);
     } else if ('min' in face.age){
       //年齢の下限のみ認識された場合
-      text += face.age.min +  ' ( ' + face.age.score + ')';
+      text += face.age.min + '歳 ' +  ' ( ' + face.age.score + ')';
       textList.push(text);
     }
     //性別

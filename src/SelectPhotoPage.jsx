@@ -106,14 +106,35 @@ export default class SelectPhotoPage extends React.Component {
           <Button onClick={this.handleSelectLibrary.bind(this)}>ライブラリから選択</Button>
         </p>
         <ul style={{padding: '10px 5px', border: '1px solid black', borderRadius: '10px'}}>
+          <center>
           <li>
-            撮影した顔写真と判定結果を連絡先に保存できます。
-          </li><li>
-            あらかじめ連絡先に氏名等を登録しておいてください。
+            撮影した顔写真と判定結果を
           </li>
           <li>
-            FaceRex結果写真を保存するには、スマホのスクリーンショットを使ってください。
+          連絡先に保存できます。
           </li>
+          <li>
+            あらかじめ連絡先に
+          </li>
+          <li>氏名等を登録しておいてください。
+          </li>
+          <li>
+            FaceRex結果写真を保存するには、
+          </li>
+           <li>
+           スマホのスクリーンショットを使ってください。
+          </li>
+           <li>
+            
+          </li> 
+          <li>
+            
+          </li> 
+          <a href="http://www.enc.jp/facerex/">顔認識アプリFaceRexの仕組み</a>
+          <li>
+            株式会社エンセファロン
+          </li>
+          </center>
         </ul>
 
         <AlertDialog isOpen={this.state.isAlertOpen} cancelable>
