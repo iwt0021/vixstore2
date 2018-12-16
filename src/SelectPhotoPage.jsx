@@ -87,9 +87,10 @@ export default class SelectPhotoPage extends React.Component {
       this.onSuccessSelectPhoto.bind(this), this.onFailedSelectPhoto.bind(this));
     cameraControl.openCamera();
   }
+
 openAuthorLink(e) {
     e.preventDefault();
-    cordova.InAppBrowser.open("http//www.enc.jp/facerex/", "_blank", "location=yes");
+    cordova.InAppBrowser.open("http://www.enc.jp/facerex/", "_blank", "location=yes");
   }
 
 
@@ -123,7 +124,8 @@ openAuthorLink(e) {
           <li>
             あらかじめ連絡先に
           </li>
-          <li>氏名等を登録しておいてください。
+          <li>
+          氏名等を登録しておいてください。
           </li>
           <li>
             FaceRex結果写真を保存するには、
