@@ -89,7 +89,7 @@ export default class SelectPhotoPage extends React.Component {
   }
 openAuthorLink(e) {
     e.preventDefault();
-    cordova.InAppBrowser.open("http//www.enc.jp/facerex/, "_blank", "location=yes");
+    cordova.InAppBrowser.open("http//www.enc.jp/facerex/", "_blank", "location=yes");
   }
 
 
@@ -131,7 +131,7 @@ openAuthorLink(e) {
            <li>
            スマホのスクリーンショットを使ってください。
           </li>
-       
+
          <p>
           <a href="#!" onClick={this.openAuthorLink}>顔認識アプリFaceRexの仕組み</a>
         </p>
@@ -139,7 +139,7 @@ openAuthorLink(e) {
           <li>
             株式会社エンセファロン
           </li>
-          </center>
+      </center>
         </ul>
 
         <AlertDialog isOpen={this.state.isAlertOpen} cancelable>
