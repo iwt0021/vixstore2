@@ -87,6 +87,11 @@ export default class SelectPhotoPage extends React.Component {
       this.onSuccessSelectPhoto.bind(this), this.onFailedSelectPhoto.bind(this));
     cameraControl.openCamera();
   }
+openAuthorLink(e) {
+    e.preventDefault();
+    cordova.InAppBrowser.open("http//www.enc.jp/facerex/, "_blank", "location=yes");
+  }
+
 
   renderToolbar() {
     return (
@@ -105,6 +110,8 @@ export default class SelectPhotoPage extends React.Component {
         <p style={{textAlign: 'center'}}>
           <Button onClick={this.handleSelectLibrary.bind(this)}>ライブラリから選択</Button>
         </p>
+
+     
         <ul style={{padding: '10px 5px', border: '1px solid black', borderRadius: '10px'}}>
           <center>
           <li>
@@ -124,13 +131,11 @@ export default class SelectPhotoPage extends React.Component {
            <li>
            スマホのスクリーンショットを使ってください。
           </li>
-           <li>
-            
-          </li> 
-          <li>
-            
-          </li> 
-          <a href="http://www.enc.jp/facerex/">顔認識アプリFaceRexの仕組み</a>
+       
+         <p>
+          <a href="#!" onClick={this.openAuthorLink}>顔認識アプリFaceRexの仕組み</a>
+        </p>
+        
           <li>
             株式会社エンセファロン
           </li>
