@@ -2,47 +2,18 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import {Toolbar, Page, Button, AlertDialog, Modal, ProgressCircular} from 'react-onsenui';
 
-import MapFacesPage, {PHOTO_MAX_W, PHOTO_MAX_H} from './MapFacesPage'
-import CameraControl from './CameraControl'
-import VisualRecognition from './VisualRecognition'
-import ImageResize from './ImageResize'
+import AbstractPage from './AbstractPage';
+import MapFacesPage, {PHOTO_MAX_W, PHOTO_MAX_H} from './MapFacesPage';
+import CameraControl from './CameraControl';
+import UserControl from './UserControl';
+import VisualRecognition from './VisualRecognition';
+import ImageControl from './ImageControl';
+import FileControl from './FileControl';
 
-export default class SelectPhotoPage extends React.Component {
+export default class SelectPhotoPage extends AbstractPage {
 
   constructor(props) {
     super(props);
-
-    this.state = {
-      isAlertOpen: false,
-      alertMessage: "",
-      isLoading: false
-    };
-  }
-
-  openAlert(message) {
-    this.closeLoding();
-    this.setState({
-      isAlertOpen: true,
-      alertMessage: message
-    });
-  }
-
-  closeAlert() {
-    this.setState({
-      isAlertOpen: false
-    });
-  }
-
-  openLoding() {
-    this.setState({
-      isLoading: true
-    });
-  }
-
-  closeLoding() {
-    this.setState({
-      isLoading: false
-    });
   }
 
   handleTakePhoto(e) {
@@ -52,35 +23,6 @@ export default class SelectPhotoPage extends React.Component {
     cameraControl.openCamera();
   }
 
-  onSuccessSelectPhoto(imageUri) {
-    this.openLoding();
-    var imageResize = new ImageResize(this.openAlert.bind(this));
-    imageResize.resize(imageUri, PHOTO_MAX_W, PHOTO_MAX_H,
-      this.onSuccessResizePhoto.bind(this));
-  }
-
-  onFailedSelectPhoto(error) {
-    this.openAlert("写真の選択に失敗しました: " + error);
-  }
-
-  onSuccessResizePhoto(imageUri, orgWidth, orgHeight) {
-    this.props.imageUri = imageUri;
-    this.props.imageOrgWidth = orgWidth;
-    this.props.imageOrgHeight = orgHeight;
-
-    var visualRecognition = new VisualRecognition(this.openAlert.bind(this));
-    visualRecognition.recognizeFaces(imageUri, this.onSuccessRecognizeFaces.bind(this))
-  }
-
-  onSuccessRecognizeFaces(res) {
-    // console.log(res);
-    this.closeLoding();
-    this.props.facesRes = res.response;
-    // console.log("facesRes: " + this.props.facesRes)
-
-    this.props.navigator.pushPage({component: MapFacesPage, props: this.props});
-  }
-
   handleSelectLibrary(e) {
     e.preventDefault();
     var cameraControl = new CameraControl(Camera.PictureSourceType.PHOTOLIBRARY,
@@ -88,11 +30,45 @@ export default class SelectPhotoPage extends React.Component {
     cameraControl.openCamera();
   }
 
-openAuthorLink(e) {
+  onSuccessSelectPhoto(imageUri) {
+    this.openLoding();
+    var promise = new Promise(FileControl.loadConfig),
+        self = this;
+    promise.then(function(cfg) {
+      self.props.cfg = cfg;
+	    return new Promise(function(resolve, reject) {
+        UserControl.activate(resolve, reject, cfg);
+      });
+    }).then(function(cfg) {
+      self.props.cfg = cfg;
+	    return new Promise(function(resolve, reject) {
+        ImageControl.resize(resolve, reject, imageUri, PHOTO_MAX_W, PHOTO_MAX_H);
+      });
+    }).then(function(res) {
+      self.props.imageUri = res.dataURL;
+      self.props.imageOrgWidth = res.orgWidth;
+      self.props.imageOrgHeight = res.orgHeight;
+	    return new Promise(function(resolve, reject) {
+        VisualRecognition.recognizeFaces(resolve, reject, self.props.cfg, res.dataURL);
+      });
+    }).then(function(res) {
+      self.closeLoding();
+      self.props.facesRes = res;
+      self.props.navigator.pushPage({component: MapFacesPage, props: self.props});
+    }).catch(function(reason) {
+      self.openAlert(reason);
+      console.log(reason);
+    });
+  }
+
+  onFailedSelectPhoto(error) {
+    this.openAlert("写真の選択に失敗しました: " + error);
+  }
+
+  openAuthorLink(e) {
     e.preventDefault();
     cordova.InAppBrowser.open("http://www.enc.jp/facerex/", "_blank", "location=yes");
   }
-
 
   renderToolbar() {
     return (
@@ -112,37 +88,24 @@ openAuthorLink(e) {
           <Button onClick={this.handleSelectLibrary.bind(this)}>ライブラリから選択</Button>
         </p>
 
-     
-        <ul style={{padding: '10px 5px', border: '1px solid black', borderRadius: '10px'}}>
-          <center>
-          <li>
-            撮影した顔写真と判定結果を
-          </li>
-          <li>
-          連絡先に保存できます。
-          </li>
-          <li>
-            あらかじめ連絡先に
-          </li>
-          <li>
-          氏名等を登録しておいてください。
-          </li>
-          <li>
-            FaceRex結果写真を保存するには、
-          </li>
-           <li>
-           スマホのスクリーンショットを使ってください。
-          </li>
+        <div style={{padding: '10px 5px', textAlign: 'center', border: '1px solid black', borderRadius: '10px'}}>
+          <p>
+            撮影した顔写真と判定結果を<br />
+            連絡先に保存できます。<br />
+            あらかじめ連絡先に<br />
+            氏名等を登録しておいてください。<br />
+            FaceRex結果写真を保存するには、<br />
+            スマホのスクリーンショットを使ってください。
+          </p>
 
-         <p>
-          <a href="#!" onClick={this.openAuthorLink}>顔認識アプリFaceRexの仕組み</a>
-        </p>
+          <p>
+            <a href="#!" onClick={this.openAuthorLink}>顔認識アプリFaceRexの仕組み</a>
+          </p>
         
-          <li>
+          <p>
             株式会社エンセファロン
-          </li>
-      </center>
-        </ul>
+          </p>
+        </div>
 
         <AlertDialog isOpen={this.state.isAlertOpen} cancelable>
           <div className="alert-dialog-content">

@@ -1,38 +1,35 @@
-import {visualRecognitionConfig} from './configEx';
+import {appBaseURI} from './commonLib';
+
+const recognizeFacesURI = appBaseURI + '/recognize/faces.php';
 
 export default class VisualRecognition {
 
-  constructor(openAlert) {
-    this.openAlert = openAlert;
-  }
-
-  refreshToken(imageUri, onSuccess) {
-    // ToDo: 有効期間は毎回取りにいかない
-    var self = this;
-    $.ajax({
-      url: "http://www.enc.jp/visualRecog/vrecogToken.php",
-      dataType: "json"
-    }).done(function(obj) {
-      self.tokenObj = obj;
-      self.recognizeFacesSub(imageUri, onSuccess);
-    }).fail(function(xhr, statusText) {
-      self.openAlert("AIサーバーとの通信に失敗しました: " + statusText);
-    });
-  }
-
-  recognizeFaces(imageUri, onSuccess) {
-    this.refreshToken(imageUri, onSuccess);
-  }
-
-  recognizeFacesSub(imageUri, onSuccess) {
-    var self = this,
-        options = new FileUploadOptions();
-    options.filekey = 'images_file';
+  static recognizeFaces(resolve, reject, cfg, imageUri) {
+    var options = new FileUploadOptions();
+    options.fileKey = 'images_file';
     options.fileName = imageUri.substr(imageUri.lastIndexOf('/') + 1);
-    options.headers = { "Authorization" : "Bearer " + this.tokenObj.access_token };
+    var params = {
+      userId: cfg.userId
+    };
+    options.params = params;
     var fileTransfer = new FileTransfer();
-    fileTransfer.upload(imageUri, visualRecognitionConfig.url, onSuccess, function(error) {
-      self.openAlert("AIサーバーとの通信に失敗しました: " + error.code
+    fileTransfer.upload(imageUri, encodeURI(recognizeFacesURI), function(r) {
+      if(r.responseCode == 200) {
+        var res = JSON.parse(r.response);
+        if(res.status == "LIMIT OVER") {
+          console.log("API呼び出し回数オーバーです。");
+          return reject("API呼び出し回数オーバーです。しばらく経ってからアクセスしてください。");
+        } else if(res.status == "OK") {
+          return resolve(JSON.stringify(res.data));
+        } else {
+          console.log("AIサーバーとの通信に失敗しました: " + JSON.stringify(res.messages));
+          return reject("AIサーバーとの通信に失敗しました");
+        }
+      } else {
+        return reject("AIサーバーとの通信に失敗しました: " + r.responseCode);
+      }
+    }, function(error) {
+      return reject("AIサーバーとの通信に失敗しました: " + error.code
         + "," + error.source + "," + error.target);
     }, options);
   }

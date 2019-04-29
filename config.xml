@@ -27,6 +27,8 @@
   <preference name="PageLength" value="0"/>
   <preference name="PaginationBreakingMode" value="page"/>
   <preference name="PaginationMode" value="unpaginated"/>
+  <preference name="AndroidPersistentFileLocation" value="Internal" />
+  <preference name="iosPersistentFileLocation" value="Library" />
   <feature name="App">
     <param name="android-package" value="org.apache.cordova.App"/>
   </feature>

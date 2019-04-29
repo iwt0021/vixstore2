@@ -1,16 +1,17 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import {Toolbar, Page, Button, BackButton, AlertDialog, Modal, List, ListItem} from 'react-onsenui';
+import {Toolbar, Page, Button, BackButton, AlertDialog, Modal, ProgressCircular} from 'react-onsenui';
 
+import AbstractPage from './AbstractPage';
 import {dateToTime14} from './commonLib';
-import ImageCrop from './ImageCrop'
+import ImageControl from './ImageControl';
 import VisualRecognition from './VisualRecognition';
-import ResultImage from './ResultImage'
-import FileControl from './FileControl'
+import ResultImage from './ResultImage';
+import FileControl from './FileControl';
 
 require('./faces.css');
 
-export default class MapFacesPage extends React.Component {
+export default class MapFacesPage extends AbstractPage {
 
   constructor(props) {
     super(props);
@@ -23,19 +24,6 @@ export default class MapFacesPage extends React.Component {
 
   componentDidMount() {
     updateFaces();
-  }
-
-  openAlert(message) {
-    this.setState({
-      isAlertOpen: true,
-      alertMessage: message
-    });
-  }
-
-  closeAlert() {
-    this.setState({
-      isAlertOpen: false
-    });
   }
 
   openSelectContact(idx, e) {
@@ -76,13 +64,25 @@ export default class MapFacesPage extends React.Component {
         face = faces[this.state.selectFaceIdx],
         loc = face.face_location;
 
-    var imageCrop = new ImageCrop(this.openAlert.bind(this));
-    imageCrop.crop(this.props.imageUri,
-      ~~(loc.left - loc.width * FACE_L_MGN),
-      ~~(loc.top - loc.height * FACE_T_MGN),
-      ~~(loc.width * (1 + FACE_L_MGN + FACE_R_MGN)),
-      ~~(loc.height * (1 + FACE_T_MGN + FACE_B_MGN)),
-      this.onSuccessCropPhoto.bind(this, this.state.contact));
+    var promise = new Promise(FileControl.loadConfig),
+        self = this;
+    promise.then(function(cfg) {
+      self.props.cfg = cfg;
+	    return new Promise(function(resolve, reject) {
+        ImageControl.crop(resolve, reject, self.props.imageUri,
+          ~~(loc.left - loc.width * FACE_L_MGN),
+          ~~(loc.top - loc.height * FACE_T_MGN),
+          ~~(loc.width * (1 + FACE_L_MGN + FACE_R_MGN)),
+          ~~(loc.height * (1 + FACE_T_MGN + FACE_B_MGN)));
+      });
+    }).then(function(imageUri) {
+	    return new Promise(function(resolve, reject) {
+        self.onSuccessCropPhoto(self.state.contact, imageUri)
+      });
+    }).catch(function(reason) {
+      self.openAlert(reason);
+      console.log(reason);
+    });
   }
 
   /**
@@ -120,7 +120,6 @@ export default class MapFacesPage extends React.Component {
 
   onSaveContactPhotoSuccess(contact) {
     console.log("onSaveContactPhotoSuccess");
-    console.log(this);
     this.openAlert((contact.displayName ? contact.displayName : contact.name.formatted) + "さんの連絡先の写真を変更しました");
   }
 
@@ -134,18 +133,6 @@ export default class MapFacesPage extends React.Component {
     // cordova.InAppBrowser.open(fileURL, "_system");
     // cordova.InAppBrowser.open(fileURL, "_blank", "location=no");
     cordova.InAppBrowser.open(fileURL, "_blank");
-  }
-
-  handleSaveResult(e) {
-    e.preventDefault();
-  
-    var resultImage = new ResultImage(this.openAlert.bind(this)),
-        dataURL = resultImage.draw($("#photoImg")[0], $("#facesRes").val()),
-        fileControl = new FileControl(this.openAlert.bind(this)),
-        fileName = "face" + dateToTime14(new Date()) + ".png";
-    // cordova.InAppBrowser.open(dataURL, "_blank");
-    // cordova.InAppBrowser.open(dataURL, "_system");
-    // fileControl.saveImage(dataURL, fileName, this.onSaveResultSuccess.bind(this));
   }
 
   renderToolbar() {
@@ -227,6 +214,7 @@ export default class MapFacesPage extends React.Component {
     );
   }
 }
+
 export const PHOTO_MAX_W = 1600,
             PHOTO_MAX_H = 1600,
             FACE_T_MGN = 0.4,
@@ -234,8 +222,6 @@ export const PHOTO_MAX_W = 1600,
             FACE_L_MGN = 0.4,
             FACE_R_MGN = 0.4,
             CNUMS = "❶❷❸❹❺❻❼❽❾❿⓫⓬⓭⓮⓯⓰⓱⓲⓳⓴";
-
-
 
 function updateFaces() {
   var winWidth = $(window).width(),
