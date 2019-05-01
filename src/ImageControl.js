@@ -27,8 +27,8 @@ export default class ImageControl {
       } else {
         return resolve({
           dataURL: dataURL,
-          width: image.width,
-          height: image.height
+          orgWidth: image.width,
+          orgHeight: image.height
         });
       }
     }

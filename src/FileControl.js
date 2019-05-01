@@ -11,7 +11,7 @@ export default class FileControl {
         create: true,
         exclusive: false
       }, function(fileEntry) {
-        FileControl.readFile(resolve, reject, fileEntry, fileName, function(resolve, reject, json) {
+        FileControl.readFile(resolve, reject, fileEntry, function(resolve, reject, json) {
           var obj = (!json || json.length == 0) ? {} : JSON.parse(json),
             cfg = FileControl.updateConfigBase(obj);
           FileControl.saveConfig(resolve, reject, obj);
@@ -49,7 +49,7 @@ export default class FileControl {
         create: true,
         exclusive: false
       }, function(fileEntry) {
-        FileControl.writeFile(resolve, reject, fileEntry, json, fileName, function() {
+        FileControl.writeFile(resolve, reject, fileEntry, json, function() {
           return resolve(cfg);
         });
       }, function() {
@@ -60,13 +60,15 @@ export default class FileControl {
     });
   }
 
-  static saveTempImage(resolve, reject, dataURL, fileName) {
+  static saveTempImage(resolve, reject, dataURL) {
     window.requestFileSystem(window.TEMPORARY, 20 * 1024 * 1024, function(fs) {
+      var nowStr = dateToTime14(new Date()),
+        fileName = "tempImage" + nowStr + ("00000" + ~~(Math.random() * 1000000)).substr(-6);
       fs.root.getFile(fileName, {
         create: true,
         exclusive: false
       }, function(fileEntry) {
-        FileControl.writeFile(resolve, reject, fileEntry, FileControl.dataURLToBlob(dataURL), fileName);
+        FileControl.writeFile(resolve, reject, fileEntry, FileControl.dataURLToBlob(dataURL));
       }, function() {
         return reject("ファイルの作成に失敗しました");
       });
@@ -75,7 +77,7 @@ export default class FileControl {
     });
   }
 
-  static readFile(resolve, reject, fileEntry, fileName, onSuccess, onFailed) {
+  static readFile(resolve, reject, fileEntry, onSuccess, onFailed) {
     fileEntry.file(function(file) {
       var reader = new FileReader();
       reader.onloadend = function() {
@@ -96,13 +98,13 @@ export default class FileControl {
     });
   }
 
-  static writeFile(resolve, reject, fileEntry, data, fileName, onSuccess, onFailed) {
+  static writeFile(resolve, reject, fileEntry, data, onSuccess, onFailed) {
     fileEntry.createWriter(function(fileWriter) {
       fileWriter.onwriteend = function() {
         if(onSuccess) {
-          return onSuccess(resolve, reject, data);
+          return onSuccess(resolve, reject);
         } else {
-          return resolve(data);
+          return resolve(fileEntry.toURL());
         }
       };
 

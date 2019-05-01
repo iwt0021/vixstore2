@@ -41,17 +41,22 @@ export default class SelectPhotoPage extends AbstractPage {
       });
     }).then(function(cfg) {
       self.props.cfg = cfg;
+      self.props.imageUri = imageUri;
 	    return new Promise(function(resolve, reject) {
         ImageControl.resize(resolve, reject, imageUri, PHOTO_MAX_W, PHOTO_MAX_H);
       });
     }).then(function(res) {
-      self.props.imageUri = res.dataURL;
       self.props.imageOrgWidth = res.orgWidth;
       self.props.imageOrgHeight = res.orgHeight;
 	    return new Promise(function(resolve, reject) {
-        VisualRecognition.recognizeFaces(resolve, reject, self.props.cfg, res.dataURL);
+        FileControl.saveTempImage(resolve, reject, res.dataURL);
       });
-    }).then(function(res) {
+    }).then(function(filePath) {
+      self.props.filePath = filePath;
+	    return new Promise(function(resolve, reject) {
+        VisualRecognition.recognizeFaces(resolve, reject, self.props.cfg, filePath);
+      });
+   }).then(function(res) {
       self.closeLoding();
       self.props.facesRes = res;
       self.props.navigator.pushPage({component: MapFacesPage, props: self.props});

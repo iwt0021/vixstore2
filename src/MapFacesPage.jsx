@@ -119,7 +119,6 @@ export default class MapFacesPage extends AbstractPage {
   }
 
   onSaveContactPhotoSuccess(contact) {
-    console.log("onSaveContactPhotoSuccess");
     this.openAlert((contact.displayName ? contact.displayName : contact.name.formatted) + "さんの連絡先の写真を変更しました");
   }
 
@@ -129,7 +128,6 @@ export default class MapFacesPage extends AbstractPage {
 
   onSaveResultSuccess(fileURL, fileName) {
     // this.openAlert("認識結果を保存しました");
-    console.log(fileURL);
     // cordova.InAppBrowser.open(fileURL, "_system");
     // cordova.InAppBrowser.open(fileURL, "_blank", "location=no");
     cordova.InAppBrowser.open(fileURL, "_blank");

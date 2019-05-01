@@ -8,12 +8,13 @@ export default class VisualRecognition {
     var options = new FileUploadOptions();
     options.fileKey = 'images_file';
     options.fileName = imageUri.substr(imageUri.lastIndexOf('/') + 1);
+    options.chunkedMode = false;
     var params = {
       userId: cfg.userId
     };
     options.params = params;
     var fileTransfer = new FileTransfer();
-    fileTransfer.upload(imageUri, encodeURI(recognizeFacesURI), function(r) {
+    fileTransfer.upload(imageUri, recognizeFacesURI, function(r) {
       if(r.responseCode == 200) {
         var res = JSON.parse(r.response);
         if(res.status == "LIMIT OVER") {
